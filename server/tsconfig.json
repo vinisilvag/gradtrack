@@ -11,18 +11,10 @@
       "@/*": [
         "./src/*",
       ],
-      "@/tests/*": [
+      "@tests/*": [
         "./tests/*",
       ]
     },
-    // "typeRoots": [
-    //   "./node_modules/@types",
-    //   "./src/@types",
-    //   "./node_modules"
-    // ],
-    // "types": [
-    //   "vitest/globals"
-    // ],
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "declaration": true,
@@ -39,6 +31,7 @@
     "node_modules"
   ],
   "include": [
-    "src"
+    "src",
+    "tests"
   ]
 }
