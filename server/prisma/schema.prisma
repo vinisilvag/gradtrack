@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubjectCategory {
+  MANDATORY
+  OPTIONAL
+  COMPLEMENTARY
+}
+
+enum ProgressStatus {
+  PENDING
+  IN_PROGRESS
+  APPROVED
+  FAILED
+}
+
+model Course {
+  id         String          @id @default(uuid())
+  name       String          @unique
+  totalHours Int
+  subjects   CourseSubject[]
+  students   Student[]
+}
+
+model Subject {
+  id         String          @id @default(uuid())
+  code       String          @unique
+  name       String
+  hours      Int
+  category   SubjectCategory @default(MANDATORY)
+  offerings  CourseSubject[]
+  progresses Progress[]
+}
+
+model CourseSubject {
+  id        String @id @default(uuid())
+  courseId  String
+  subjectId String
+  semester  Int
+
+  course  Course  @relation(fields: [courseId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([courseId, subjectId])
+}
+
+model Student {
+  id       String     @id @default(uuid())
+  name     String
+  email    String     @unique
+  courseId String
+  course   Course     @relation(fields: [courseId], references: [id])
+  progress Progress[]
+}
+
+model Progress {
+  id        String         @id @default(uuid())
+  studentId String
+  subjectId String
+  status    ProgressStatus @default(PENDING)
+  grade     Float?
+
+  student Student @relation(fields: [studentId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([studentId, subjectId])
+}

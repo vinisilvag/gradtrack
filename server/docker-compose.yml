@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: gradtrack-postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DB=gradtrack
+    volumes:
+      - gradtrack_pg_data:/var/lib/postgresql/data
+
+volumes:
+  gradtrack_pg_data:
