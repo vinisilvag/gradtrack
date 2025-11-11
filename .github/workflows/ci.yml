@@ -19,22 +19,26 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        working-directory: ./server
         with:
           node-version: 22
+          working-directory: ./server
 
       - name: Display Node.js version
-        working-directory: ./server
         run: node --version
+        with:
+          working-directory: ./server
 
       - name: Fetch dependencies
-        working-directory: ./server
         run: npm install
+        with:
+          working-directory: ./server
 
       # - name: Build project
-      #   working-directory: ./server
       #   run: npm run build
+      #   with:
+      #     working-directory: ./server
 
       - name: Run unit tests
-        working-directory: ./server
         run: npm run test
+        with:
+          working-directory: ./server
