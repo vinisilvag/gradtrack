@@ -1,0 +1,40 @@
+name: gradtrack API - CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        working-directory: ./server
+        with:
+          node-version: 22
+
+      - name: Display Node.js version
+        working-directory: ./server
+        run: node --version
+
+      - name: Fetch dependencies
+        working-directory: ./server
+        run: npm install
+
+      # - name: Build project
+      #   working-directory: ./server
+      #   run: npm run build
+
+      - name: Run unit tests
+        working-directory: ./server
+        run: npm run test
