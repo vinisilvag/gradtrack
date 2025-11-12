@@ -13,14 +13,14 @@ describe("Get Students", () => {
     getStudents = new GetStudents(inMemoryStudentsRepository);
   });
 
-  it("should be able to list an empty students list", async () => {
+  it("should return an empty list of students", async () => {
     const { students } = await getStudents.execute();
 
     expect(students).toBeTruthy();
     expect(students).toHaveLength(0);
   });
 
-  it("should be able to list 2 registered students", async () => {
+  it("should return all registered students", async () => {
     inMemoryStudentsRepository.create({
       name: faker.person.fullName(),
       email: faker.internet.email(),

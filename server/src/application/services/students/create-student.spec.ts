@@ -21,7 +21,7 @@ describe("Create Student", () => {
     );
   });
 
-  it("should be able to create a student", async () => {
+  it("should create a new student", async () => {
     const course = await inMemoryCoursesRepository.create({
       name: faker.word.words(2),
       totalHours: faker.number.int({ min: 2600, max: 3600 }),
@@ -36,7 +36,7 @@ describe("Create Student", () => {
     expect(student).toBeTruthy();
   });
 
-  it("should not be able to create a student with an already existing email", async () => {
+  it("should throw an error when creating a student with an existing email", async () => {
     const course = await inMemoryCoursesRepository.create({
       name: faker.word.words(2),
       totalHours: faker.number.int({ min: 2600, max: 3600 }),
@@ -59,7 +59,7 @@ describe("Create Student", () => {
     }).rejects.toEqual(new StudentAlreadyExists());
   });
 
-  it("should not be able to create a student with an invalid or non-existent courseId", async () => {
+  it("should throw an error when creating a student with an invalid or non-existent course ID", async () => {
     expect(async () => {
       await createStudent.execute({
         name: faker.person.fullName(),

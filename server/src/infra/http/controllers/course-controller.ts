@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { container } from "tsyringe";
 
 import { GetCourses } from "@/application/services/courses/get-courses";
-import { GetCourseStudents } from "@/application/services/courses/get-course-studenets";
+import { GetCourseStudents } from "@/application/services/courses/get-course-students";
 
 import { CourseViewModel } from "@/infra/http/view-models/course-view-model";
 import { StudentViewModel } from "../view-models/student-view-model";
@@ -30,6 +30,4 @@ export class CourseController {
       students: students.map((student) => StudentViewModel.toHTTP(student)),
     });
   }
-
-  public async getCourseSubjects(request: Request, response: Response) {}
 }

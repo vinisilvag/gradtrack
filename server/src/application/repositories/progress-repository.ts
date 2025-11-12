@@ -4,7 +4,7 @@ export interface UpdateOrInsertProgress {
   studentId: string;
   subjectId: string;
   status: string;
-  grade: number;
+  grade: number | undefined;
 }
 
 export interface ProgressRepository {

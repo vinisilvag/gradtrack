@@ -10,7 +10,7 @@ interface UpdateProgressRequest {
   studentId: string;
   subjectId: string;
   status: string;
-  grade: number;
+  grade: number | undefined;
 }
 
 interface UpdateProgressResponse {
