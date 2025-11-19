@@ -48,6 +48,12 @@ jobs:
       - name: Start DB inside Docker
         run: docker compose up -d
 
+      - name: "Create .env file"
+        run: |
+          touch .env
+          echo DATABASE_URL="postgresql://postgres:docker@localhost:5432/gradtrack?schema=public" >> .env
+          cat .env
+
       - name: Run unit tests with coverage
         run: npm run test:coverage
 
