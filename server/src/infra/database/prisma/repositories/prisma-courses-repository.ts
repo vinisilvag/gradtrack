@@ -17,4 +17,12 @@ export class PrismaCoursesRepository implements CoursesRepository {
   async findById(id: string) {
     return await prisma.course.findUnique({ where: { id } });
   }
+
+  async findByName(name: string) {
+    return await prisma.course.findUnique({ where: { name } });
+  }
+
+  async delete(id: string) {
+    await prisma.course.delete({ where: { id } });
+  }
 }

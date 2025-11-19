@@ -39,4 +39,9 @@ export class InMemoryStudentsRepository implements StudentsRepository {
     this.students.push(createdStudent);
     return createdStudent;
   }
+
+  async delete(id: string) {
+    const studentsLeft = this.students.filter((student) => student.id !== id);
+    this.students = studentsLeft;
+  }
 }

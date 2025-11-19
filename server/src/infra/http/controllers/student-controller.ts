@@ -12,9 +12,12 @@ import { updateProgressBody } from "@/infra/http/dtos/students/update-progress-b
 import { updateProgressParams } from "@/infra/http/dtos/students/update-progress-params";
 
 import { GetStudentReport } from "@/application/services/students/get-student-report";
+
 import { studentReportParams } from "@/infra/http/dtos/students/student-report-params";
+import { deleteStudentParams } from "@/infra/http/dtos/students/delete-student-params";
 
 import { GetStudents } from "@/application/services/students/get-students";
+import { DeleteStudent } from "@/application/services/students/delete-student";
 
 export class StudentController {
   public async index(_: Request, response: Response) {
@@ -41,11 +44,11 @@ export class StudentController {
     const { studentId } = studentReportParams.parse(request.params);
 
     const getStudentReport = container.resolve(GetStudentReport);
-    const { report } = await getStudentReport.execute({
+    const report = await getStudentReport.execute({
       studentId,
     });
 
-    return response.status(200).json({ report });
+    return response.status(200).json(report);
   }
 
   public async updateProgress(request: Request, response: Response) {
@@ -63,5 +66,14 @@ export class StudentController {
     return response
       .status(200)
       .json({ update: StudentViewModel.toHTTP(update) });
+  }
+
+  public async delete(request: Request, response: Response) {
+    const { studentId } = deleteStudentParams.parse(request.params);
+
+    const deleteStudent = container.resolve(DeleteStudent);
+    await deleteStudent.execute({ studentId });
+
+    return response.status(204).send();
   }
 }

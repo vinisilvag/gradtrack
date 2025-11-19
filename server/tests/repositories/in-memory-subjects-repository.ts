@@ -20,9 +20,24 @@ export class InMemorySubjectsRepository implements SubjectsRepository {
     return createdSubject;
   }
 
+  async findMany() {
+    return this.subjects;
+  }
+
   async findById(id: string) {
     const subject = this.subjects.find((subject) => subject.id === id);
     if (!subject) return null;
     return subject;
+  }
+
+  async findByCode(code: string) {
+    const subject = this.subjects.find((subject) => subject.code === code);
+    if (!subject) return null;
+    return subject;
+  }
+
+  async delete(id: string) {
+    const subjectsLeft = this.subjects.filter((subject) => subject.id !== id);
+    this.subjects = subjectsLeft;
   }
 }

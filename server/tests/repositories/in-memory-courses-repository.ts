@@ -26,4 +26,15 @@ export class InMemoryCoursesRepository implements CoursesRepository {
     if (!course) return null;
     return course;
   }
+
+  async findByName(name: string) {
+    const course = this.courses.find((course) => course.name === name);
+    if (!course) return null;
+    return course;
+  }
+
+  async delete(id: string) {
+    const coursesLeft = this.courses.filter((course) => course.id !== id);
+    this.courses = coursesLeft;
+  }
 }

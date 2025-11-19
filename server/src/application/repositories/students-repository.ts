@@ -12,4 +12,5 @@ export interface StudentsRepository {
   findByEmail: (email: string) => Promise<Student | null>;
   findByCourseId: (courseId: string) => Promise<Student[]>;
   create: (data: CreateStudent) => Promise<Student>;
+  delete: (id: string) => Promise<void>;
 }

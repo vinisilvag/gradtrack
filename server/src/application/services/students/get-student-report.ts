@@ -9,9 +9,7 @@ interface GetStudentReportRequest {
   studentId: string;
 }
 
-interface GetStudentReportResponse {
-  report: any;
-}
+type GetStudentReportResponse = any;
 
 @Injectable()
 export class GetStudentReport {
@@ -39,8 +37,6 @@ export class GetStudentReport {
       0,
     );
 
-    console.log("b");
-
     const categories = student.progress.reduce(
       (
         acc: any,
@@ -57,17 +53,15 @@ export class GetStudentReport {
     );
 
     return {
-      report: {
-        student: { id: student.id, name: student.name, email: student.email },
-        course: {
-          id: student.courseId,
-          name: student.course.name,
-          totalHours: student.course.totalHours,
-        },
-        approvedHours,
-        remainingHours: Math.max(student.course.totalHours - approvedHours, 0),
-        categories,
+      student: { id: student.id, name: student.name, email: student.email },
+      course: {
+        id: student.courseId,
+        name: student.course.name,
+        totalHours: student.course.totalHours,
       },
+      approvedHours,
+      remainingHours: Math.max(student.course.totalHours - approvedHours, 0),
+      categories,
     };
   }
 }

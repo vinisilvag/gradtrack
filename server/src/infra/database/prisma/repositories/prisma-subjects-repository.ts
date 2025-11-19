@@ -14,7 +14,19 @@ export class PrismaSubjectsRepository implements SubjectsRepository {
     });
   }
 
+  async findMany() {
+    return await prisma.subject.findMany();
+  }
+
   async findById(id: string) {
     return await prisma.subject.findUnique({ where: { id } });
+  }
+
+  async findByCode(code: string) {
+    return await prisma.subject.findUnique({ where: { code } });
+  }
+
+  async delete(id: string) {
+    await prisma.subject.delete({ where: { id } });
   }
 }

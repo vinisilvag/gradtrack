@@ -9,5 +9,6 @@ studentRoutes.get("/", studentController.index);
 studentRoutes.post("/", studentController.create);
 studentRoutes.patch("/:studentId/progress", studentController.updateProgress);
 studentRoutes.get("/:studentId/report", studentController.report);
+studentRoutes.delete("/:studentId", studentController.delete);
 
 export { studentRoutes };

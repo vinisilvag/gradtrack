@@ -12,6 +12,9 @@ import { PrismaSubjectsRepository } from "@/infra/database/prisma/repositories/p
 import { ProgressRepository } from "@/application/repositories/progress-repository";
 import { PrismaProgressRepository } from "@/infra/database/prisma/repositories/prisma-progress-repository";
 
+import { CourseSubjectsRepository } from "@/application/repositories/course-subjects-repository";
+import { PrismaCourseSubjectsRepository } from "@/infra/database/prisma/repositories/prisma-course-subjects-repository";
+
 // repositories
 container.registerSingleton<StudentsRepository>(
   "StudentsRepository",
@@ -31,4 +34,9 @@ container.registerSingleton<SubjectsRepository>(
 container.registerSingleton<ProgressRepository>(
   "ProgressRepository",
   PrismaProgressRepository,
+);
+
+container.registerSingleton<CourseSubjectsRepository>(
+  "CourseSubjectsRepository",
+  PrismaCourseSubjectsRepository,
 );
