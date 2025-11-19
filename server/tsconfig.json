@@ -15,12 +15,10 @@
         "./tests/*",
       ]
     },
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "declaration": true,
     "allowJs": true,
     "removeComments": true,
-    "noEmit": true,
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
