@@ -35,37 +35,38 @@ jobs:
       # - name: Build project
       #   run: npm run build
 
-      - name: Setup Docker on macOS
-        if: matrix.os == 'macos-15-intel'
-        uses: douglascamata/setup-docker-macos-action@v1.0.1
-        with:
-          lima: v1.2.1
-          colima: v0.9.1
-          colima-network-address: false
+      # - name: Setup Docker on macOS
+      #   if: matrix.os == 'macos-15-intel'
+      #   uses: douglascamata/setup-docker-macos-action@v1.0.1
+      #   with:
+      #     lima: v1.2.1
+      #     colima: v0.9.1
+      #     colima-network-address: false
 
-      - name: Ensure Docker is available
-        if: matrix.os != 'windows-latest'
+      - name: Ensure Docker is available (Linux only)
+        if: matrix.os == 'ubuntu-latest'
         run: docker --version
 
-      - name: Start DB inside Docker
-        if: matrix.os != 'windows-latest'
+      - name: Start DB inside Docker (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: docker compose up -d
 
-      - name: "Create .env file"
+      - name: Create .env file (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           touch .env
           echo DATABASE_URL="postgresql://postgres:docker@localhost:5432/gradtrack?schema=public" >> .env
           cat .env
 
-      - name: Run unit tests on Windows
+      - name: Run unit tests (Windows/MacOS)
         if: matrix.os == 'windows-latest'
         run: npm run test:unit
 
-      - name: Run tests with coverage
+      - name: Run all tests with coverage (Linux)
         if: matrix.os != 'windows-latest'
         run: npm run test:coverage
 
-      - name: Upload coverage reports to Codecov
+      - name: Upload coverage reports to Codecov (Linux)
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v5
         with:
