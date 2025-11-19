@@ -35,6 +35,16 @@ jobs:
       # - name: Build project
       #   run: npm run build
 
+      - name: Install Docker on macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install docker colima
+          colima start
+
+      - name: Ensure Docker is available (Linux/Windows)
+        if: matrix.os != 'macos-latest'
+        run: docker --version
+
       - name: Start DB inside Docker
         run: docker compose up -d
 
