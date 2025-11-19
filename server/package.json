@@ -14,9 +14,9 @@
     "start:prod": "node dist/src/server.js",
     "start:dev": "tsx watch -r tsconfig-paths/register src/server.ts",
     "seed": "tsx prisma/seed.ts",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:unit": "jest --runInBand --testPathIgnorePatterns=\".*\\.e2e-spec\\.ts\" --collectCoverageFrom=\"src/application/services/**\"",
+    "test:integration": "jest --runInBand --collectCoverageFrom=\"src/infra/http/controllers/**\"",
+    "test:coverage": "jest --runInBand --coverage"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
