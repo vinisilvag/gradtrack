@@ -31,7 +31,7 @@ Para a escrita do sistema, utlizamos as seguintes tecnologias:
 
 ## Como executar o sistema
 
-Para executar o sistema, é preciso ter instalado na máquina o Node.js em sua versão 22.* e o gerenciador de pacotes de sua preferência (para desenvolvimento utilizamos o npm). Além disso, é necessário que o usuário possua o Docker instalado no sistema. Utilizaremos ele para subir a instância do banco de dados PostgreSQL utilizada pelo servidor do sistema.
+Para executar o sistema, é preciso ter instalado na máquina o Node.js em sua versão 22.\* e o gerenciador de pacotes de sua preferência (para desenvolvimento utilizamos o npm). Além disso, é necessário que o usuário possua o Docker instalado no sistema. Utilizaremos ele para subir a instância do banco de dados PostgreSQL utilizado pelo servidor do sistema.
 
 Por fim, antes de executar o sistema, é necessário definir as variáveis de ambiente. Para tanto, basta criar um arquivo `.env` na raiz do projeto e copiar o conteúdo de `.env.example` para ele.
 
@@ -44,6 +44,7 @@ DATABASE_URL="postgresql://postgres:docker@localhost:5432/gradtrack?schema=publi
 Para instanciar o banco de dados com o Docker, baixar os pacotes necessários para a aplicação e executar as `migrations`, os comandos
 
 ```
+cd server
 docker compose up -d
 npm install
 npx prisma db push
@@ -59,9 +60,27 @@ npm run start:dev
 
 deve ser usado para executar a API.
 
+Para executar o bot, primeiramente é necessário ter uma conta no Discord e seguir o guia presente [aqui](https://discordpy.readthedocs.io/en/stable/discord.html) para criar a aplicação do bot e convidá-lo para um servidor que você tenha permissões. As permissões necessárias são apenas de enviar mensagens, verificar o histórico de mensagens e visualizar os canais. Após isso, utilizando o modo de desenvolvedor do Discord, é necessário [recuperar o ID do servidor](https://cybrancee.com/learn/knowledge-base/how-to-find-a-discord-guild-id/) e substituir a linha
+
+```
+MY_GUILD = discord.Object(id=seu-id-aqui)
+```
+
+no arquivo `bot.py` com o ID do servidor copiado.
+
+Após isso, os comandos a seguir devem ser executados para criar o ambiente virtual Python, ativá-lo, instalar os pacotes necessários e, por fim, executar o bot.
+
+```
+cd bot
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+python3 bot.py
+```
+
 ## Como executar os testes
 
-Para executar o conjunto de testes de unidade e de integração que foram escritos, uma vez que o ambiente de execução tenha sido configurado, basta executar os comandos
+Para executar o conjunto de testes de unidade e de integração que foram escritos, uma vez que o ambiente de execução do servidor tenha sido configurado e você está com o terminal na pasta dele, basta executar os comandos
 
 ```
 npm run test:unit

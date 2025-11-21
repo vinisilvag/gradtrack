@@ -58,18 +58,18 @@ describe("[e2e] Subject Controller", () => {
     expect(response.body.subjects).toHaveLength(3);
   });
 
-  // it("should delete an existing subject", async () => {
-  //   const subject = await prisma.subject.create({
-  //     data: {
-  //       code: faker.string.alphanumeric(6),
-  //       name: faker.word.words(3),
-  //       hours: faker.number.int({ min: 30, max: 120 }),
-  //       category: "MANDATORY",
-  //     },
-  //   });
+  it("should delete an existing subject", async () => {
+    const subject = await prisma.subject.create({
+      data: {
+        code: faker.string.alphanumeric(6),
+        name: faker.word.words(3),
+        hours: faker.number.int({ min: 30, max: 120 }),
+        category: "MANDATORY",
+      },
+    });
 
-  //   const response = await request(app).delete(`/api/subjects/${subject.id}`);
+    const response = await request(app).delete(`/api/subjects/${subject.id}`);
 
-  //   expect(response.statusCode).toBe(204);
-  // });
+    expect(response.statusCode).toBe(204);
+  });
 });

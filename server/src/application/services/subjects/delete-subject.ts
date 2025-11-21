@@ -11,7 +11,7 @@ interface DeleteSubjectRequest {
 @Injectable()
 export class DeleteSubject {
   constructor(
-    @Inject("StudentsRepository")
+    @Inject("SubjectsRepository")
     private readonly subjectsRepository: SubjectsRepository,
   ) {}
 

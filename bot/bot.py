@@ -53,7 +53,6 @@ async def handle_api_error(inter: discord.Interaction, error: Exception):
         msg = f"📚 **{erro_msg}**"
 
     elif isinstance(error, InvalidIDError):
-        # Aqui talvez você queira manter um prefixo fixo para explicar o contexto
         msg = f"🔢 **ID Inválido:** {erro_msg}"
 
     elif isinstance(error, ValidationError):
@@ -171,7 +170,7 @@ async def atualizar_progresso(
         nota = None
 
     try:
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer()
 
         r = await update_progress(estudante_id, materia_id, status, nota)
 
@@ -310,7 +309,7 @@ async def cadastrar_materia_curso(
         return
 
     try:
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer()
 
         # 2. Chama a API
         await attach_subject(curso_id, materia_id, semestre)
@@ -321,7 +320,6 @@ async def cadastrar_materia_curso(
         await inter.followup.send(
             f"✅ **Sucesso!**\n"
             f"A matéria `{materia_id}` foi vinculada ao curso `{curso_id}`.",
-            ephemeral=True,
         )
 
     except Exception as e:
@@ -334,13 +332,12 @@ async def cadastrar_materia_curso(
 )
 async def cadastrar_curso(inter: discord.Interaction, nome: str, total_horas: int):
     try:
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer()
 
         await create_course(nome, total_horas)
 
         await inter.followup.send(
             f"✅ **Sucesso!**\nO curso `{nome}` foi cadastrado.",
-            ephemeral=True,
         )
 
     except Exception as e:
@@ -357,13 +354,12 @@ async def cadastrar_estudante(
     inter: discord.Interaction, nome: str, email: str, curso_id: str
 ):
     try:
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer()
 
         await create_student(nome, email, curso_id)
 
         await inter.followup.send(
             f"✅ **Sucesso!**\nO estudante `{nome}`, com email `{email}`, foi cadastrado.",
-            ephemeral=True,
         )
 
     except Exception as e:
@@ -437,13 +433,12 @@ async def cadastrar_materia(
         return
 
     try:
-        await inter.response.defer(ephemeral=True)
+        await inter.response.defer()
 
         await create_subject(codigo, nome, horas, categoria)
 
         await inter.followup.send(
             f"✅ **Sucesso!**\nA matéria `{codigo} - {nome}` foi cadastrada.",
-            ephemeral=True,
         )
 
     except Exception as e:
