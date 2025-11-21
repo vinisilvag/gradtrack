@@ -450,8 +450,14 @@ async def cadastrar_materia(
         await handle_api_error(inter, e)
 
 
+# Server Vinicius
 MY_GUILD = discord.Object(id=1441485443341353094)
+
+# Server Mateus
 # MY_GUILD = discord.Object(id=1398317901684936804)
+
+# Server Mirna
+# MY_GUILD = discord.Object(id=)
 
 
 @client.event
