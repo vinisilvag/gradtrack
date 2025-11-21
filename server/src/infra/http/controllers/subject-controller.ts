@@ -2,14 +2,6 @@ import type { Request, Response } from "express";
 
 import { container } from "tsyringe";
 
-import { GetCourses } from "@/application/services/courses/get-courses";
-
-import { CourseViewModel } from "@/infra/http/view-models/course-view-model";
-
-import { createCourseBody } from "../dtos/courses/create-course-body";
-import { CreateCourse } from "@/application/services/courses/create-course";
-import { deleteCourseParams } from "../dtos/courses/delete-course-params";
-import { DeleteCourse } from "@/application/services/courses/delete-course";
 import { GetSubjects } from "@/application/services/subjects/get-subjects";
 import { createSubjectBody } from "../dtos/subjects/create-subject-body";
 import { CreateSubject } from "@/application/services/subjects/create-subject";

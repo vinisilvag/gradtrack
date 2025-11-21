@@ -27,8 +27,6 @@ export class GetStudentReport {
       throw new StudentNotFound();
     }
 
-    console.log("a");
-
     const approved = student.progress.filter(
       (p: { status: string }) => p.status === ProgressStatus.APPROVED,
     );
