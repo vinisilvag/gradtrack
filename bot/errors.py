@@ -1,28 +1,37 @@
 import httpx
 
+
 class ApiBaseError(Exception):
     pass
+
 
 class ApiConnectionError(ApiBaseError):
     pass
 
+
 class ValidationError(ApiBaseError):
     pass
+
 
 class InvalidIDError(ValidationError):
     pass
 
+
 class NotFoundError(ApiBaseError):
     pass
+
 
 class StudentNotFound(NotFoundError):
     pass
 
+
 class CourseNotFound(NotFoundError):
     pass
 
+
 class SubjectNotFound(NotFoundError):
     pass
+
 
 def _check_generic_errors(r: httpx.Response):
     """
@@ -33,7 +42,7 @@ def _check_generic_errors(r: httpx.Response):
             err_json = r.json()
             if "uuid" in str(err_json).lower():
                 raise InvalidIDError("Formato de ID incorreto.")
-            msg = err_json.get('message', 'Dados enviados inválidos.')
+            msg = err_json.get("message", "Dados enviados inválidos.")
             raise ValidationError(msg)
         except ValueError:
             raise ValidationError("Requisição inválida (400).")
@@ -43,3 +52,4 @@ def _check_generic_errors(r: httpx.Response):
         r.raise_for_status()
     except httpx.HTTPStatusError as e:
         raise ApiBaseError(f"Erro HTTP: {e.response.status_code} - {e.response.text}")
+

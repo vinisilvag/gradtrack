@@ -1,11 +1,31 @@
-import os, discord
+import os
+import uuid
+from typing import Optional
+
+import discord
+from api_client import (
+    ApiConnectionError,
+    attach_subject,
+    create_course,
+    create_student,
+    create_subject,
+    get_report,
+    list_courses,
+    list_students,
+    list_subjects,
+    update_progress,
+)
 from discord import app_commands
 from dotenv import load_dotenv
-from api_client import get_report, get_progress, ApiConnectionError, list_subjects, \
-    list_courses, attach_subject
-import uuid
-from errors import NotFoundError, InvalidIDError, StudentNotFound, CourseNotFound, SubjectNotFound, ApiBaseError, \
-    ValidationError
+from errors import (
+    ApiBaseError,
+    CourseNotFound,
+    InvalidIDError,
+    NotFoundError,
+    StudentNotFound,
+    SubjectNotFound,
+    ValidationError,
+)
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
@@ -49,6 +69,7 @@ async def handle_api_error(inter: discord.Interaction, error: Exception):
         # Erros de código (bugs no python) continuam indo pro console
         print(f"ERRO CRÍTICO NÃO TRATADO: {error}")
         import traceback
+
         traceback.print_exc()
         msg = "❌ Erro interno do bot. O administrador foi notificado."
 
@@ -58,6 +79,7 @@ async def handle_api_error(inter: discord.Interaction, error: Exception):
     else:
         await inter.response.send_message(msg, ephemeral=True)
 
+
 def is_valid_uuid(val):
     try:
         uuid.UUID(str(val))
@@ -65,48 +87,110 @@ def is_valid_uuid(val):
     except ValueError:
         return False
 
+
 @tree.command(name="extrato", description="Mostra extrato do aluno (ID interno)")
-async def extrato(inter: discord.Interaction, aluno_id: str):
-  if not is_valid_uuid(aluno_id):
-    await inter.response.send_message("⚠️ **ID Inválido:** Por favor forneça um UUID válido.", ephemeral=True)
-    return
+async def extrato(inter: discord.Interaction, estudante_id: str):
+    if not is_valid_uuid(estudante_id):
+        await inter.response.send_message(
+            "⚠️ **ID Inválido:** Por favor forneça um UUID válido.", ephemeral=True
+        )
+        return
 
-  try:
-    await inter.response.defer()
-    rep = await get_report(aluno_id)
-    report = rep['report']
-    msg = (f"**{report['student']['name']}** — {report['course']['name']}\n"
-           f"Aprovadas: **{report['approvedHours']}** / {report['course']['totalHours']} "
-           f"(faltam **{report['remainingHours']}**)\n" +
-           "\n".join([f"- {k}: {v['done']}/{v['total']} h" for k,v in report['categories'].items()]))
-    await inter.followup.send(msg)
-  except Exception as e:
-    await handle_api_error(inter, e)
+    cat_map = {
+        "MANDATORY": "🔴 Obrigatória",
+        "OPTIONAL": "🟢 Optativa",
+        "COMPLEMENTARY": "🔵 Complementar",
+    }
 
-@tree.command(name="atualizar_progresso", description="Registra a atualização de progresso em uma matéria")
-async def progresso(inter: discord.Interaction, aluno_id: str, materia_id: str, status: str, ):
-  if not is_valid_uuid(aluno_id):
-    await inter.response.send_message("⚠️ **ID Inválido:** Por favor forneça um UUID válido.", ephemeral=True)
-    return
+    try:
+        await inter.response.defer()
+        rep = await get_report(estudante_id)
+        report = rep["report"]
+        msg = (
+            f"**{report['student']['name']}** — {report['course']['name']}\n"
+            f"Aprovadas: **{report['approvedHours']}** / {report['course']['totalHours']} "
+            f"(faltam **{report['remainingHours']}**)\n"
+            + "\n".join(
+                [
+                    f"- {cat_map[k]}: {v['done']}/{v['total']} h"
+                    for k, v in report["categories"].items()
+                ]
+            )
+        )
+        await inter.followup.send(msg)
+    except Exception as e:
+        await handle_api_error(inter, e)
 
-  try:
-    await inter.response.defer()
-    rep = await get_progress(aluno_id)
-    msg = (f"**{rep['student']['name']}** — {rep['course']['name']}\n"
-           f"Aprovadas: **{rep['approvedHours']}** / {rep['course']['totalHours']} "
-           f"(faltam **{rep['remainingHours']}**)\n" +
-           "\n".join([f"- {k}: {v['done']}/{v['total']} h" for k,v in rep['categories'].items()]))
-    await inter.followup.send(msg)
-  except Exception as e:
-    await handle_api_error(inter, e)
 
-@tree.command(name="listar_materias", description="Listar todas as matérias cadastradas")
+@tree.command(
+    name="atualizar_progresso",
+    description="Registra a atualização de progresso em uma matéria",
+)
+@app_commands.describe(
+    estudante_id="ID do estudante (UUID)",
+    materia_id="ID da matéria (UUID)",
+    status='Status da matéria ("PENDENTE", "CURSANDO", "APROVADO" ou "REPROVADO")',
+    nota="Nota em caso de ter sido aprovado (int)",
+)
+async def atualizar_progresso(
+    inter: discord.Interaction,
+    estudante_id: str,
+    materia_id: str,
+    status: str,
+    nota: Optional[int],
+):
+    if not is_valid_uuid(estudante_id):
+        await inter.response.send_message(
+            "⚠️ **ID do estudante inválido:** Por favor forneça um UUID válido.",
+            ephemeral=True,
+        )
+        return
+
+    if not is_valid_uuid(materia_id):
+        await inter.response.send_message(
+            "⚠️ **ID da matéria inválido:** Por favor forneça um UUID válido.",
+            ephemeral=True,
+        )
+        return
+
+    if status not in ["PENDENTE", "CURSANDO", "APROVADO", "REPROVADO"]:
+        await inter.response.send_message(
+            '⚠️ **Status inválido:** deve ser "PENDENTE", "CURSANDO", "APROVADO" ou "REPROVADO".',
+            ephemeral=True,
+        )
+        return
+
+    if status == "APROVADO" and not nota:
+        await inter.response.send_message(
+            "⚠️ **Nota faltante:** Em caso de status `APROVADO`, uma `nota` deve ser fornecida.",
+            ephemeral=True,
+        )
+        return
+
+    if status != "APROVADO":
+        nota = None
+
+    try:
+        await inter.response.defer(ephemeral=True)
+
+        r = await update_progress(estudante_id, materia_id, status, nota)
+
+        msg = f"✅ **Sucesso!**\nProgresso do estudante `{estudante_id}` atualizado!"
+
+        await inter.followup.send(msg)
+    except Exception as e:
+        await handle_api_error(inter, e)
+
+
+@tree.command(
+    name="listar_materias", description="Listar todas as matérias cadastradas"
+)
 async def listar_materias(inter: discord.Interaction):
     try:
         await inter.response.defer()
 
         data = await list_subjects()
-        subjects = data.get('subjects', [])
+        subjects = data.get("subjects", [])
 
         if not subjects:
             await inter.followup.send("📭 Nenhuma matéria cadastrada.")
@@ -120,17 +204,19 @@ async def listar_materias(inter: discord.Interaction):
         cat_map = {
             "MANDATORY": "🔴 Obrigatória",
             "OPTIONAL": "🟢 Optativa",
-            "COMPLEMENTARY": "🔵 Complementar"
+            "COMPLEMENTARY": "🔵 Complementar",
         }
 
         for sub in subjects:
             # Ex: 📕 **MAT101** — Cálculo I (80h)
             # Traduz a categoria ou usa a original se não achar no mapa
-            categoria_formatada = cat_map.get(sub['category'], sub['category'])
+            categoria_formatada = cat_map.get(sub["category"], sub["category"])
 
             # Monta a linha
-            linha = (f"**{sub['code']}** — {sub['name']}  | 🆔 `{sub['id']}`\n"
-                     f"⏱️ {sub['hours']}h  |  🏷️ {categoria_formatada}")
+            linha = (
+                f"**{sub['code']}** — {sub['name']}  | 🆔 `{sub['id']}`\n"
+                f"⏱️ {sub['hours']}h  |  🏷️ {categoria_formatada}"
+            )
 
             lines.append(linha)
 
@@ -167,7 +253,7 @@ async def listar_cursos(inter: discord.Interaction):
         await inter.response.defer()
 
         data = await list_courses()
-        courses = data.get('courses', [])
+        courses = data.get("courses", [])
 
         if not courses:
             await inter.followup.send("📭 Nenhum curso encontrado.")
@@ -209,15 +295,18 @@ async def listar_cursos(inter: discord.Interaction):
         await handle_api_error(inter, e)
 
 
-@tree.command(name="cadastrar_materia_curso", description="Vincula uma matéria a um curso")
-@app_commands.describe(
-    curso_id="ID do Curso (UUID)",
-    materia_id="ID da Matéria (UUID)"
+@tree.command(
+    name="cadastrar_materia_curso", description="Vincula uma matéria a um curso"
 )
-async def cadastrar_materia_curso(inter: discord.Interaction, curso_id: str, materia_id: str, semestre: int):
+@app_commands.describe(curso_id="ID do Curso (UUID)", materia_id="ID da Matéria (UUID)")
+async def cadastrar_materia_curso(
+    inter: discord.Interaction, curso_id: str, materia_id: str, semestre: int
+):
     # 1. Validação básica local para economizar API
     if not is_valid_uuid(curso_id) or not is_valid_uuid(materia_id):
-        await inter.response.send_message("⚠️ **IDs Inválidos:** Verifique se ambos são UUIDs.", ephemeral=True)
+        await inter.response.send_message(
+            "⚠️ **IDs Inválidos:** Verifique se ambos são UUIDs.", ephemeral=True
+        )
         return
 
     try:
@@ -232,18 +321,144 @@ async def cadastrar_materia_curso(inter: discord.Interaction, curso_id: str, mat
         await inter.followup.send(
             f"✅ **Sucesso!**\n"
             f"A matéria `{materia_id}` foi vinculada ao curso `{curso_id}`.",
-            ephemeral=True
+            ephemeral=True,
         )
 
     except Exception as e:
         await handle_api_error(inter, e)
 
 
-MY_GUILD=discord.Object(id=1398317901684936804)
+@tree.command(name="cadastrar_curso", description="Cadastra um curso")
+@app_commands.describe(
+    nome="Nome do curso (str)", total_horas="Total de horas do curso (int)"
+)
+async def cadastrar_curso(inter: discord.Interaction, nome: str, total_horas: int):
+    try:
+        await inter.response.defer(ephemeral=True)
+
+        await create_course(nome, total_horas)
+
+        await inter.followup.send(
+            f"✅ **Sucesso!**\nO curso `{nome}` foi cadastrado.",
+            ephemeral=True,
+        )
+
+    except Exception as e:
+        await handle_api_error(inter, e)
+
+
+@tree.command(name="cadastrar_estudante", description="Cadastra um estudante")
+@app_commands.describe(
+    nome="Nome do estudante (str)",
+    email="Email do estudante",
+    curso_id="ID do curso que ele faz (UUID)",
+)
+async def cadastrar_estudante(
+    inter: discord.Interaction, nome: str, email: str, curso_id: str
+):
+    try:
+        await inter.response.defer(ephemeral=True)
+
+        await create_student(nome, email, curso_id)
+
+        await inter.followup.send(
+            f"✅ **Sucesso!**\nO estudante `{nome}`, com email `{email}`, foi cadastrado.",
+            ephemeral=True,
+        )
+
+    except Exception as e:
+        await handle_api_error(inter, e)
+
+
+@tree.command(
+    name="listar_estudantes", description="Lista todos os estudantes cadastrados"
+)
+async def listar_estudantes(inter: discord.Interaction):
+    try:
+        await inter.response.defer()
+
+        data = await list_students()
+        students = data.get("students", [])
+
+        if not students:
+            await inter.followup.send("📭 Nenhum estudante cadastrado.")
+            return
+
+        # Cabeçalho
+        header = "🧑‍🎓 **Estudantes Cadastrados**\n\n"
+        lines = []
+
+        for student in students:
+            # Formatação focada em clareza
+            # Colocamos o ID em `código` para facilitar copiar/colar se precisar usar em outro comando
+            linha = (
+                f"**{student['name']}**\n📧 `{student['email']}`\n🆔 `{student['id']}`"
+            )
+            lines.append(linha)
+
+        # --- Lógica de Paginação (Chunking) ---
+        message_chunks = []
+        current_chunk = header
+
+        for line in lines:
+            # Verifica limite de 2000 caracteres com margem de segurança
+            if len(current_chunk) + len(line) + 4 > 1900:
+                message_chunks.append(current_chunk)
+                current_chunk = ""
+
+            current_chunk += f"{line}\n\n"
+
+        if current_chunk:
+            message_chunks.append(current_chunk)
+
+        # Envia as mensagens
+        for msg in message_chunks:
+            await inter.followup.send(msg)
+
+    except Exception as e:
+        await handle_api_error(inter, e)
+
+
+@tree.command(name="cadastrar_materia", description="Cadastra uma nova matéria")
+@app_commands.describe(
+    codigo="Código da matéria (str)",
+    nome="Nome da matéria (str)",
+    horas="Duração em horas da matéria (int)",
+    categoria='Categoria da matéria ("OBRIGATORIA", "OPTATIVA" ou "COMPLEMENTAR")',
+)
+async def cadastrar_materia(
+    inter: discord.Interaction, codigo: str, nome: str, horas: int, categoria: str
+):
+    if categoria not in ["OBRIGATORIA", "OPTATIVA", "COMPLEMENTAR"]:
+        await inter.response.send_message(
+            '⚠️ **Categoria inválida:** deve ser "OBRIGATORIA", "OPTATIVA" ou "COMPLEMENTAR".',
+            ephemeral=True,
+        )
+        return
+
+    try:
+        await inter.response.defer(ephemeral=True)
+
+        await create_subject(codigo, nome, horas, categoria)
+
+        await inter.followup.send(
+            f"✅ **Sucesso!**\nA matéria `{codigo} - {nome}` foi cadastrada.",
+            ephemeral=True,
+        )
+
+    except Exception as e:
+        await handle_api_error(inter, e)
+
+
+MY_GUILD = discord.Object(id=1441485443341353094)
+# MY_GUILD = discord.Object(id=1398317901684936804)
+
+
 @client.event
 async def on_ready():
-  tree.copy_global_to(guild=MY_GUILD)
-  await tree.sync(guild=MY_GUILD)
-  print(f"Logado como {client.user}")
+    tree.copy_global_to(guild=MY_GUILD)
+    await tree.sync(guild=MY_GUILD)
+    print(f"Logado como {client.user}")
+
 
 client.run(TOKEN)
