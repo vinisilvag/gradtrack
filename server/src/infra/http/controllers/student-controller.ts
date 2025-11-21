@@ -48,7 +48,7 @@ export class StudentController {
       studentId,
     });
 
-    return response.status(200).json(report);
+    return response.status(200).json({report});
   }
 
   public async updateProgress(request: Request, response: Response) {
