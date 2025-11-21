@@ -14,16 +14,71 @@ A ideia é desenvolver um sistema que permita o cadastro de cursos, alunos e dis
 
 As funcionalidades principais do sistema serão disponibilizadas por meio de uma API, responsável por centralizar a lógica de negócio e a comunicação com o banco de dados. Dessa forma, o bot no Discord atuará como uma interface de acesso, permitindo que os usuários interajam com os recursos de forma simples e intuitiva, sem precisar lidar diretamente com a complexidade da aplicação. Por meio de comandos no servidor do Discord, será possível consumir as funcionalidades expostas pela API, garantindo uma integração eficiente e uma experiência de uso acessível e prática.
 
-## Possíveis tecnologias do sistema
+## Tecnologias do sistema
 
-Para a escrita do sistema, queremos utilizar as seguintes tecnologias:
+Para a escrita do sistema, utlizamos as seguintes tecnologias:
 
 - API:
   - Node.js, como ambiente de execução do servidor;
   - TypeScript, como linguagem de programação principal;
   - Express, como framework web para o Node.js, para a criação das rotas que recebem dados e enviam as respostas para os usuários;
   - PostgresSQL, como banco de dados para persistir as informações cadastradas;
-  - Prisma, como ORM para simplificar a realização de operações no banco de dados e geração e aplicação das migrações.
+  - Prisma, como ORM para simplificar a realização de operações no banco de dados e geração e aplicação das migrações;
+  - Jest, como framework de teste para escrita e coleta das informações de cobertura.
 - Bot no Discord:
   - Python, como linguagem de programação principal;
   - discord.py, como biblioteca para integração com a API do Discord e implementação dos comandos e eventos do bot.
+
+## Como executar o sistema
+
+Para executar o sistema, é preciso ter instalado na máquina o Node.js em sua versão 22.* e o gerenciador de pacotes de sua preferência (para desenvolvimento utilizamos o npm). Além disso, é necessário que o usuário possua o Docker instalado no sistema. Utilizaremos ele para subir a instância do banco de dados PostgreSQL utilizada pelo servidor do sistema.
+
+Por fim, antes de executar o sistema, é necessário definir as variáveis de ambiente. Para tanto, basta criar um arquivo `.env` na raiz do projeto e copiar o conteúdo de `.env.example` para ele.
+
+```
+PORT=3333
+NODE_ENV = "development"
+DATABASE_URL="postgresql://postgres:docker@localhost:5432/gradtrack?schema=public"
+```
+
+Para instanciar o banco de dados com o Docker, baixar os pacotes necessários para a aplicação e executar as `migrations`, os comandos
+
+```
+docker compose up -d
+npm install
+npx prisma db push
+```
+
+devem ser executados.
+
+Com o ambiente configurado, o comando
+
+```
+npm run start:dev
+```
+
+deve ser usado para executar a API.
+
+## Como executar os testes
+
+Para executar o conjunto de testes de unidade e de integração que foram escritos, uma vez que o ambiente de execução tenha sido configurado, basta executar os comandos
+
+```
+npm run test:unit
+```
+
+para executar os testes de unidade e
+
+```
+npm run test:integration
+```
+
+para executar os testes de integração. Os testes de integração, para serem executados, criam um novo schema no banco de dados e executam as requisições lá. Após ter sido executado, o schema é deletado e, portanto, o banco de produção não é prejudicado pela execução dos testes de integração.
+
+Por fim, o comando
+
+```
+npm run test:coverage
+```
+
+pode ser executado para verificar a cobertura dos testes em relação ao sistema todo.
